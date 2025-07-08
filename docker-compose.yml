@@ -1,0 +1,20 @@
+services:
+  ollama:
+    image: ollama/ollama
+    container_name: ollama_v3
+    restart: unless-stopped
+    ports:
+      - "11434:11434"
+    volumes:
+      - ollama:/root/.ollama
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - capabilities: [ gpu ]
+    runtime: nvidia
+    environment:
+      - NVIDIA_VISIBLE_DEVICES=all
+
+volumes:
+  ollama:
