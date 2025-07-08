@@ -131,3 +131,24 @@ def get_reports_from_db():
         raise
     finally:
         session.close()
+
+
+def get_report_by_id(report_id: int):
+    """
+    Retrieve report from the database by its ID.
+
+    Returns:
+        ReportModel: Report object.
+
+    Raises:
+        Exception: For any database-related errors during the query.
+    """
+    session = SessionLocal()
+    try:
+        report = session.query(ReportModel).filter(ReportModel.id == report_id).first()
+        return report
+    except Exception:
+        session.rollback()
+        raise
+    finally:
+        session.close()

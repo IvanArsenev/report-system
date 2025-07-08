@@ -12,7 +12,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from langchain_community.llms import Ollama
 
 from models import ReportBody, ChangeStatusBody
-from database_functions import save_report, init_db, update_report, get_reports_from_db
+from database_functions import save_report, init_db, update_report, get_reports_from_db, get_report_by_id
 
 logging.basicConfig(level=logging.INFO)
 parser = argparse.ArgumentParser(description="Run FastAPI app with config")
@@ -98,7 +98,7 @@ async def change_status(data: ChangeStatusBody):
     """
     try:
         report_id = update_report(
-            report_id=data.id,
+            report_id=data.report_id,
             status=data.status,
         )
         return {
@@ -116,6 +116,17 @@ async def reports_per_hour():
     """
     try:
         return get_reports_from_db()
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.get("/report/{report_id}")
+async def report_by_id(report_id: str):
+    """
+    Endpoint to receive all reports from the last hour.
+    """
+    try:
+        return get_report_by_id(report_id)
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 

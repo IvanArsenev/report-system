@@ -37,6 +37,8 @@ config:
     api_layer_url: 'https://api.apilayer.com/sentiment/analysis'
     api_layer_key: 'apilayer api key'
   telegram:
+    host: '127.0.0.1'
+    port: 8001
     bot_token: 'token'
     admin_id: 1234567890
   ollama:
