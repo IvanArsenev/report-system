@@ -11,10 +11,36 @@ services:
       resources:
         reservations:
           devices:
-            - capabilities: [ gpu ]
+            - capabilities: [gpu]
     runtime: nvidia
     environment:
       - NVIDIA_VISIBLE_DEVICES=all
+
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: my_app
+    depends_on:
+      - ollama
+    volumes:
+      - .:/app
+    working_dir: /app
+    command: ["poetry", "run", "python", "main.py", "--config", "./default.yaml"]
+    restart: unless-stopped
+
+  bot:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: my_bot
+    depends_on:
+      - app
+    volumes:
+      - .:/bot
+    working_dir: /bot
+    command: [ "poetry", "run", "python", "bot.py", "--config", "./default.yaml" ]
+    restart: unless-stopped
 
 volumes:
   ollama:
