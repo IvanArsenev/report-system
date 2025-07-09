@@ -16,5 +16,22 @@ services:
     environment:
       - NVIDIA_VISIBLE_DEVICES=all
 
+  fastapi-app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: fastapi_app
+    restart: unless-stopped
+    ports:
+      - "8000:8000"
+    volumes:
+      - .:/app
+    depends_on:
+      - ollama
+    environment:
+      - GOOGLE_APPLICATION_CREDENTIALS=/app/google_api_key.json
+    command: >
+      python main.py --config ./default.yaml
+
 volumes:
   ollama:

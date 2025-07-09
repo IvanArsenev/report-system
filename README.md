@@ -4,7 +4,7 @@ A service for processing complaints based on the API Layer service (for determin
 
 ## Description
 
-The project is a web service (FastAPI) that processes complaints through third-party APIs, and also sends complaints to the administrator via a telegram bot and google docs.
+The project is a web service (FastAPI) that processes complaints through third-party APIs, and also sends complaints to the administrator via a telegram bot and Google Docs.
 
 ---
 
@@ -19,6 +19,10 @@ cd report-system
 
 ```bash
 docker compose up --build
+```
+
+```bash
+docker exec -it ollama_v3 ollama pull llama3
 ```
 
 ---
