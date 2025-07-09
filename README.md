@@ -210,6 +210,21 @@ PUT http://127.0.0.1:8000/notify
 ```
 
 ---
+## n8n
+
+Скрипт выглядит так:
+
+![n8n](./docs/n8n.jpg)
+
+Результат работы в google sheet
+
+![n8n](./docs/google_demo.jpg)
+
+Результат работы в telegram
+
+![n8n](./docs/telegram_demo.jpg)
+
+---
 
 ## About me
 
