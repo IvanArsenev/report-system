@@ -122,7 +122,7 @@ def get_reports_from_db():
     try:
         reports = (session
                    .query(ReportModel)
-                   .filter(ReportModel.timestamp >= one_hour_ago and ReportModel.status == 'open')
+                   .filter((ReportModel.timestamp >= one_hour_ago) & (ReportModel.status == 'open'))
                    .all()
                    )
         return reports

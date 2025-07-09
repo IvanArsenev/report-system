@@ -10,8 +10,10 @@ import urllib.parse
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from langchain_community.llms import Ollama
+from google.oauth2 import service_account
+from googleapiclient.discovery import build
 
-from models import ReportBody, ChangeStatusBody
+from models import ReportBody, ChangeStatusBody, ReportIdsModel, SentimentEnum
 from database_functions import save_report, init_db, update_report, get_reports_from_db, get_report_by_id
 
 logging.basicConfig(level=logging.INFO)
@@ -41,6 +43,35 @@ llm = Ollama(
     model="llama3",
     base_url=config['ollama']['host'],
 )
+
+
+credentials = service_account.Credentials.from_service_account_file(
+    config['google']['service_account_file_path']
+).with_scopes(config['google']['scopes'])
+
+sheets_service = build('sheets', 'v4', credentials=credentials)
+
+
+async def append_to_google_sheet(values: list):
+    """
+    Добавляет строку в Google Sheets.
+    Values — список значений, например:
+    ['Дата', 'Настроение', 'Текст жалобы']
+    """
+    try:
+        body = {
+            'values': [values]
+        }
+        result = sheets_service.spreadsheets().values().append(
+            spreadsheetId=config['google']['doc_id'],
+            range='Лист1!A1',
+            valueInputOption='USER_ENTERED',
+            insertDataOption='INSERT_ROWS',
+            body=body
+        ).execute()
+        logging.info(f"Appended to Google Sheet: {result}")
+    except Exception as e:
+        logging.error(f"Failed to append to Google Sheet: {e}")
 
 
 @app.post("/report")
@@ -129,6 +160,54 @@ async def report_by_id(report_id: str):
         return get_report_by_id(report_id)
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.post("/notify")
+async def notify(report_ids: ReportIdsModel):
+    """
+    Endpoint to send a notifications.
+    """
+    report_ids = report_ids.report_ids
+    for report_id in report_ids:
+        report = await report_by_id(report_id)
+        if report.category == 'техническая':
+            logging.info('New report of technical category')
+            message_text = (f'Новая жалоба:\n\nТекст:\n{report.text}\n\n'
+                            f'Настроение:\n{SentimentEnum[report.sentiment].value}')
+            response = requests.post(
+                f"https://api.telegram.org/bot{config['telegram_api']['bot_token']}/sendMessage",
+                json={
+                    "chat_id": config['telegram_api']['admin_id'],
+                    "text": message_text
+                }
+            )
+            if response.status_code != 200:
+                logging.error("Failed to send Telegram message")
+            try:
+                change_data = ChangeStatusBody(report_id=report_id, status="closed")
+                await change_status(change_data)
+            except Exception as e:
+                logging.error(f"Failed to change report status {e}")
+        elif report.category == 'оплата':
+            logging.info('New report of payment category')
+            data_of_report = report.timestamp.strftime('%H:%M:%S %d-%m-%Y')
+            text_of_report = report.text
+            sentiment_of_report = SentimentEnum[report.sentiment].value
+            row_values = [data_of_report, sentiment_of_report, text_of_report]
+            await append_to_google_sheet(row_values)
+            try:
+                change_data = ChangeStatusBody(report_id=report_id, status="closed")
+                await change_status(change_data)
+            except Exception as e:
+                logging.error(f"Failed to change report status {e}")
+        else:
+            logging.info(
+                'New report of other category: %s - %s - %s',
+                report.timestamp,
+                report.text,
+                SentimentEnum[report.sentiment].value,
+            )
+    return {"message": "All reports was closed!"}
 
 
 if __name__ == "__main__":

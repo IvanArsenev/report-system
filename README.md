@@ -4,7 +4,7 @@ A service for processing complaints based on the API Layer service (for determin
 
 ## Description
 
-The project is a web service (FastAPI) that processes complaints through third-party APIs, and also sends complaints to the administrator via a telegram bot.
+The project is a web service (FastAPI) that processes complaints through third-party APIs, and also sends complaints to the administrator via a telegram bot and google docs.
 
 ---
 
@@ -36,13 +36,15 @@ config:
     api_layer_url: 'https://api.apilayer.com/sentiment/analysis'
     api_layer_key: 'apilayer api key'
   telegram:
-    host: '127.0.0.1'
-    port: 8001
     bot_token: 'token'
     admin_id: 1234567890
   ollama:
     host: 'http://localhost:11434'
     prompt: 'Ты часть программного кода, ты должен отвечать только одним из предоставленных вариантов. Определи категорию жалобы: {text}. Варианты: техническая, оплата, другое.'
+  google:
+    scopes: ['https://www.googleapis.com/auth/spreadsheets']
+    service_account_file_path: './google_api_key.json'
+    doc_id: 'id документа'
 ```
 
 ---

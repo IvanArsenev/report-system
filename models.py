@@ -1,7 +1,7 @@
 """Models and enums used in the application."""
 
 import enum
-from typing import Optional
+from typing import Optional, List
 
 from sqlalchemy import (
     Column,
@@ -12,7 +12,7 @@ from sqlalchemy import (
 )
 from sqlalchemy.sql import func
 from sqlalchemy.ext.declarative import declarative_base
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 Base = declarative_base()
 
@@ -60,3 +60,8 @@ class ChangeStatusBody(BaseModel):
     """Pydantic model for incoming changes of report data."""
     report_id: int
     status: StatusEnum
+
+
+class ReportIdsModel(BaseModel):
+    """Pydantic model for incoming changes of report data."""
+    report_ids: List[int] = Field(..., description="List of report IDs to be processed.")

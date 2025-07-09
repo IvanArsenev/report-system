@@ -2,3 +2,4 @@ database.db
 default.yaml
 .venv
 .idea
+google_api_key.json
