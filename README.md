@@ -121,6 +121,78 @@ PUT http://127.0.0.1:8000/change_status
 }
 ```
 
+### `GET /reports`
+
+Endpoint to get all open reports.
+
+**Request example:**
+
+```
+PUT http://127.0.0.1:8000/reports
+```
+
+**Response example:**
+
+```json
+[
+    {
+        "sentiment": "neutral",
+        "id": 1,
+        "timestamp": "2025-07-09T05:53:43",
+        "text": "Как мне оплатить",
+        "status": "open",
+        "category": "оплата"
+    },
+  ...
+]
+```
+
+### `GET /report/{report_id}`
+
+Endpoint get report data by id.
+
+**Request example:**
+
+```
+PUT http://127.0.0.1:8000/report/1
+```
+
+**Response example:**
+
+```json
+{
+    "sentiment": "neutral",
+    "id": 1,
+    "timestamp": "2025-07-09T05:53:43",
+    "text": "Как мне оплатить",
+    "status": "open",
+    "category": "оплата"
+}
+```
+
+### `POST /notify`
+
+Endpoint get report data by id.
+
+**Request example:**
+
+```
+PUT http://127.0.0.1:8000/notify
+```
+```json
+{
+    "report_ids": [1, 2, 3, 4]
+}
+```
+
+**Response example:**
+
+```json
+{
+  "message": "All reports was closed!"
+}
+```
+
 ---
 
 ## Project structure
